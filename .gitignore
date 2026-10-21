@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+!.env.sample
+data/*.sqlite3
+data/*.db
+frontend/node_modules/
+frontend/.next/
+frontend/tsconfig.tsbuildinfo
+~$*.docx
+Capstone_Submission_Instruction.pdf
+Submission-ready_checkList.docx
