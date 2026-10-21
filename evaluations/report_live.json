@@ -24,8 +24,8 @@
       ],
       "retrieved_example_ids": [
         "orders-by-status-count",
-        "orders-per-customer-country",
-        "total-orders-count"
+        "total-orders-count",
+        "orders-per-year"
       ],
       "tags": [
         "normal",
@@ -56,7 +56,7 @@
       ],
       "retrieved_example_ids": [
         "monthly-gross-revenue",
-        "top-products-by-gross-revenue",
+        "revenue-by-category",
         "revenue-last-quarter"
       ],
       "tags": [
@@ -81,7 +81,7 @@
       "expected_action": "answer",
       "expected_error": null,
       "expected_query_type": "SELECT_TEMPORAL",
-      "generated_sql": "SELECT STRFTIME('%Y-%m', o.order_date) AS order_month, p.product_name, SUM(oi.line_total_cents) AS total_sales_cents FROM orders AS o JOIN order_items AS oi USING (order_id) JOIN products AS p USING (product_id) GROUP BY order_month, p.product_id, p.product_name ORDER BY order_month, total_sales_cents DESC LIMIT 100",
+      "generated_sql": "SELECT STRFTIME('%Y-%m', o.order_date) AS order_month, p.product_name, SUM(oi.line_total_cents) AS gross_revenue_cents FROM orders AS o JOIN order_items AS oi ON o.order_id = oi.order_id JOIN products AS p ON oi.product_id = p.product_id GROUP BY order_month, p.product_id, p.product_name ORDER BY order_month, gross_revenue_cents DESC LIMIT 100",
       "id": "monthly-sales-by-product",
       "passed": true,
       "relevant_example_ids": [
@@ -89,8 +89,8 @@
       ],
       "retrieved_example_ids": [
         "monthly-sales-by-product",
-        "sales-for-partial-product-name",
-        "order-line-items-detail"
+        "order-line-items-detail",
+        "sales-for-partial-product-name"
       ],
       "tags": [
         "normal",
@@ -123,8 +123,8 @@
       ],
       "retrieved_example_ids": [
         "top-products-by-gross-revenue",
-        "monthly-gross-revenue",
-        "top-customers-by-spend"
+        "revenue-last-quarter",
+        "revenue-by-category"
       ],
       "tags": [
         "normal",
@@ -156,8 +156,8 @@
       ],
       "retrieved_example_ids": [
         "customer-order-details",
-        "customers-by-region-list",
-        "orders-with-customer-and-status"
+        "orders-with-customer-and-status",
+        "shipments-with-carrier-and-customer"
       ],
       "tags": [
         "normal",
@@ -188,8 +188,8 @@
       ],
       "retrieved_example_ids": [
         "average-order-by-region",
-        "customers-by-region-list",
-        "average-product-price-by-category"
+        "average-items-per-order",
+        "orders-per-customer-country"
       ],
       "tags": [
         "normal",
@@ -221,7 +221,7 @@
       ],
       "retrieved_example_ids": [
         "orders-last-month",
-        "orders-in-year-2025",
+        "orders-per-year",
         "orders-per-customer-country"
       ],
       "tags": [
@@ -246,7 +246,7 @@
       "expected_action": "answer",
       "expected_error": null,
       "expected_query_type": "SELECT_TEMPORAL",
-      "generated_sql": "SELECT DATE(s.shipped_at) AS shipment_date, AVG(JULIANDAY(s.delivered_at) - JULIANDAY(s.shipped_at)) AS avg_delivery_days FROM shipments AS s WHERE s.status = 'delivered' GROUP BY DATE(s.shipped_at) ORDER BY shipment_date LIMIT 100",
+      "generated_sql": "SELECT DATE(s.shipped_at) AS shipment_date, AVG(JULIANDAY(s.delivered_at) - JULIANDAY(s.shipped_at)) AS avg_delivery_days FROM shipments AS s WHERE s.status = 'delivered' GROUP BY shipment_date ORDER BY shipment_date LIMIT 100",
       "id": "delivered-shipment-times",
       "passed": false,
       "relevant_example_ids": [
@@ -255,7 +255,7 @@
       "retrieved_example_ids": [
         "delivered-shipment-times",
         "average-delivery-days-by-carrier",
-        "shipments-with-carrier-and-customer"
+        "customer-order-details"
       ],
       "tags": [
         "normal",
@@ -274,12 +274,12 @@
       },
       "context_precision_at_3": 0.3333333333333333,
       "context_recall_at_3": 1.0,
-      "exact_match": false,
+      "exact_match": true,
       "execution_match": true,
       "expected_action": "answer",
       "expected_error": null,
       "expected_query_type": "SELECT_JOIN",
-      "generated_sql": "SELECT p.product_name, c.name AS category_name FROM products AS p JOIN categories AS c ON p.category_id = c.category_id ORDER BY c.name, p.product_name LIMIT 100",
+      "generated_sql": "SELECT p.product_name, c.name AS category_name FROM products AS p JOIN categories AS c USING (category_id) ORDER BY c.name, p.product_name LIMIT 100",
       "id": "products-by-category",
       "passed": true,
       "relevant_example_ids": [
@@ -288,7 +288,7 @@
       "retrieved_example_ids": [
         "products-by-category",
         "list-category-names",
-        "revenue-by-category"
+        "products-per-category"
       ],
       "tags": [
         "normal",
@@ -366,20 +366,20 @@
       "actual_error": null,
       "actual_query_type": "SELECT_AGGREGATE",
       "checks": {
-        "execution_match": false,
+        "execution_match": true,
         "query_type_matches": true,
         "retrieved_examples_match_response": true
       },
-      "context_precision_at_3": 0.0,
-      "context_recall_at_3": 0.0,
+      "context_precision_at_3": 0.3333333333333333,
+      "context_recall_at_3": 0.5,
       "exact_match": false,
-      "execution_match": false,
+      "execution_match": true,
       "expected_action": "answer",
       "expected_error": null,
       "expected_query_type": "SELECT_AGGREGATE",
-      "generated_sql": "SELECT p.product_name, SUM(oi.quantity) AS total_quantity_sold FROM order_items AS oi JOIN products AS p USING (product_id) GROUP BY p.product_name ORDER BY total_quantity_sold DESC LIMIT 100",
+      "generated_sql": "SELECT p.product_name, SUM(oi.quantity) AS total_quantity_sold FROM order_items AS oi JOIN products AS p USING (product_id) GROUP BY p.product_id, p.product_name ORDER BY total_quantity_sold DESC LIMIT 100",
       "id": "quantity-by-product",
-      "passed": false,
+      "passed": true,
       "relevant_example_ids": [
         "monthly-sales-by-product",
         "top-products-by-gross-revenue"
@@ -387,7 +387,7 @@
       "retrieved_example_ids": [
         "order-line-items-detail",
         "revenue-by-category",
-        "best-selling-products-by-quantity"
+        "monthly-sales-by-product"
       ],
       "tags": [
         "normal",
@@ -419,9 +419,9 @@
         "revenue-by-category"
       ],
       "retrieved_example_ids": [
-        "best-selling-products-by-quantity",
         "revenue-by-category",
-        "most-expensive-products"
+        "best-selling-products-by-quantity",
+        "top-products-by-gross-revenue"
       ],
       "tags": [
         "normal",
@@ -454,7 +454,7 @@
       "retrieved_example_ids": [
         "total-orders-count",
         "orders-by-status-count",
-        "orders-in-year-2025"
+        "orders-per-year"
       ],
       "tags": [
         "normal",
@@ -477,7 +477,7 @@
       "expected_action": "answer",
       "expected_error": null,
       "expected_query_type": "SELECT_SIMPLE",
-      "generated_sql": "SELECT name FROM categories ORDER BY name LIMIT 100",
+      "generated_sql": "SELECT name FROM categories LIMIT 100",
       "id": "category-names-eval",
       "passed": false,
       "relevant_example_ids": [
@@ -486,7 +486,7 @@
       "retrieved_example_ids": [
         "list-category-names",
         "products-by-category",
-        "shipments-with-carrier-and-customer"
+        "orders-with-customer-and-status"
       ],
       "tags": [
         "normal",
@@ -502,8 +502,8 @@
         "query_type_matches": true,
         "retrieved_examples_match_response": true
       },
-      "context_precision_at_3": 0.0,
-      "context_recall_at_3": 0.0,
+      "context_precision_at_3": 0.3333333333333333,
+      "context_recall_at_3": 1.0,
       "exact_match": true,
       "execution_match": true,
       "expected_action": "answer",
@@ -516,9 +516,9 @@
         "most-expensive-products"
       ],
       "retrieved_example_ids": [
-        "average-product-price-by-category",
         "best-selling-products-by-quantity",
-        "list-category-names"
+        "most-expensive-products",
+        "average-product-price-by-category"
       ],
       "tags": [
         "normal",
@@ -537,12 +537,12 @@
       },
       "context_precision_at_3": 0.3333333333333333,
       "context_recall_at_3": 1.0,
-      "exact_match": true,
+      "exact_match": false,
       "execution_match": true,
       "expected_action": "answer",
       "expected_error": null,
       "expected_query_type": "SELECT_SIMPLE",
-      "generated_sql": "SELECT order_id, customer_id, order_date, total_amount_cents FROM orders WHERE status = 'cancelled' ORDER BY order_date DESC LIMIT 100",
+      "generated_sql": "SELECT order_id, customer_id, order_date, total_amount_cents FROM orders WHERE status LIKE '%cancelled%' ORDER BY order_date DESC LIMIT 100",
       "id": "cancelled-orders-eval",
       "passed": true,
       "relevant_example_ids": [
@@ -550,12 +550,44 @@
       ],
       "retrieved_example_ids": [
         "cancelled-orders-list",
-        "order-line-items-detail",
-        "refunds-with-order-status"
+        "refunds-with-order-status",
+        "Orders for 2024-02-23"
       ],
       "tags": [
         "normal",
         "simple"
+      ]
+    },
+    {
+      "actual_action": "answer",
+      "actual_error": null,
+      "actual_query_type": "SELECT_AGGREGATE",
+      "checks": {
+        "execution_match": false,
+        "query_type_matches": true,
+        "retrieved_examples_match_response": true
+      },
+      "context_precision_at_3": 0.3333333333333333,
+      "context_recall_at_3": 1.0,
+      "exact_match": false,
+      "execution_match": false,
+      "expected_action": "answer",
+      "expected_error": null,
+      "expected_query_type": "SELECT_AGGREGATE",
+      "generated_sql": "SELECT SUM(total_amount_cents) AS total_refunded_cents FROM orders WHERE LOWER(status) LIKE '%refund%' LIMIT 100",
+      "id": "total-refunds-eval",
+      "passed": false,
+      "relevant_example_ids": [
+        "total-refunded-amount"
+      ],
+      "retrieved_example_ids": [
+        "total-refunded-amount",
+        "payments-by-method",
+        "revenue-by-category"
+      ],
+      "tags": [
+        "normal",
+        "aggregate"
       ]
     },
     {
@@ -574,39 +606,7 @@
       "expected_action": "answer",
       "expected_error": null,
       "expected_query_type": "SELECT_AGGREGATE",
-      "generated_sql": "SELECT SUM(amount_cents) AS total_refunded_cents FROM payments WHERE payment_type = 'refund' LIMIT 100",
-      "id": "total-refunds-eval",
-      "passed": true,
-      "relevant_example_ids": [
-        "total-refunded-amount"
-      ],
-      "retrieved_example_ids": [
-        "total-refunded-amount",
-        "payments-by-method",
-        "total-orders-count"
-      ],
-      "tags": [
-        "normal",
-        "aggregate"
-      ]
-    },
-    {
-      "actual_action": "answer",
-      "actual_error": null,
-      "actual_query_type": "SELECT_AGGREGATE",
-      "checks": {
-        "execution_match": true,
-        "query_type_matches": true,
-        "retrieved_examples_match_response": true
-      },
-      "context_precision_at_3": 0.3333333333333333,
-      "context_recall_at_3": 1.0,
-      "exact_match": true,
-      "execution_match": true,
-      "expected_action": "answer",
-      "expected_error": null,
-      "expected_query_type": "SELECT_AGGREGATE",
-      "generated_sql": "SELECT payment_method, SUM(amount_cents) AS charged_cents FROM payments WHERE payment_type = 'charge' GROUP BY payment_method ORDER BY charged_cents DESC LIMIT 100",
+      "generated_sql": "SELECT payment_method, SUM(amount_cents) AS charged_cents FROM payments WHERE LOWER(payment_type) = 'charge' GROUP BY payment_method ORDER BY charged_cents DESC LIMIT 100",
       "id": "payments-by-method-eval",
       "passed": true,
       "relevant_example_ids": [
@@ -614,8 +614,8 @@
       ],
       "retrieved_example_ids": [
         "payments-by-method",
-        "revenue-last-quarter",
-        "refunds-with-order-status"
+        "orders-per-customer-country",
+        "average-order-by-region"
       ],
       "tags": [
         "normal",
@@ -661,20 +661,20 @@
       "actual_error": null,
       "actual_query_type": "SELECT_JOIN",
       "checks": {
-        "execution_match": true,
+        "execution_match": false,
         "query_type_matches": true,
         "retrieved_examples_match_response": true
       },
       "context_precision_at_3": 0.3333333333333333,
       "context_recall_at_3": 1.0,
       "exact_match": false,
-      "execution_match": true,
+      "execution_match": false,
       "expected_action": "answer",
       "expected_error": null,
       "expected_query_type": "SELECT_JOIN",
-      "generated_sql": "SELECT p.payment_id, p.order_id, o.status, p.amount_cents, p.paid_at FROM payments AS p JOIN orders AS o ON p.order_id = o.order_id WHERE p.payment_type LIKE '%refund%' COLLATE NOCASE ORDER BY p.paid_at DESC LIMIT 100",
+      "generated_sql": "SELECT p.payment_id, p.order_id, p.amount_cents, p.paid_at, o.status FROM payments AS p JOIN orders AS o USING (order_id) WHERE p.payment_type = 'refund' COLLATE NOCASE ORDER BY p.paid_at DESC LIMIT 100",
       "id": "refund-details-eval",
-      "passed": true,
+      "passed": false,
       "relevant_example_ids": [
         "refunds-with-order-status"
       ],
@@ -704,7 +704,7 @@
       "expected_action": "answer",
       "expected_error": null,
       "expected_query_type": "SELECT_JOIN",
-      "generated_sql": "SELECT p.product_name, oi.quantity FROM order_items AS oi JOIN products AS p ON oi.product_id = p.product_id ORDER BY oi.order_id LIMIT 100",
+      "generated_sql": "SELECT p.product_name, oi.quantity FROM order_items AS oi JOIN products AS p ON oi.product_id = p.product_id LIMIT 100",
       "id": "line-items-eval",
       "passed": false,
       "relevant_example_ids": [
@@ -712,8 +712,8 @@
       ],
       "retrieved_example_ids": [
         "order-line-items-detail",
-        "average-items-per-order",
-        "cancelled-orders-list"
+        "products-by-category",
+        "orders-with-customer-and-status"
       ],
       "tags": [
         "normal",
@@ -745,7 +745,7 @@
       "retrieved_example_ids": [
         "orders-per-year",
         "orders-per-customer-country",
-        "orders-in-year-2025"
+        "orders-last-month"
       ],
       "tags": [
         "normal",
@@ -777,8 +777,8 @@
       ],
       "retrieved_example_ids": [
         "average-delivery-days-by-carrier",
-        "delivered-shipment-times",
-        "orders-per-carrier"
+        "orders-per-carrier",
+        "delivered-shipment-times"
       ],
       "tags": [
         "normal",
@@ -810,8 +810,8 @@
       ],
       "retrieved_example_ids": [
         "new-customers-per-month",
-        "monthly-gross-revenue",
-        "customer-count-by-country"
+        "customer-count-by-country",
+        "orders-last-month"
       ],
       "tags": [
         "normal",
@@ -838,8 +838,8 @@
       "passed": true,
       "relevant_example_ids": [],
       "retrieved_example_ids": [
-        "list-category-names",
-        "orders-with-customer-and-status",
+        "Orders for 2024-02-23",
+        "cancelled-orders-list",
         "total-orders-count"
       ],
       "tags": [
@@ -866,9 +866,8 @@
       "passed": true,
       "relevant_example_ids": [],
       "retrieved_example_ids": [
-        "list-category-names",
-        "orders-with-customer-and-status",
-        "total-orders-count"
+        "cancelled-orders-list",
+        "Orders for 2024-02-23"
       ],
       "tags": [
         "adversarial",
@@ -895,8 +894,8 @@
       "passed": true,
       "relevant_example_ids": [],
       "retrieved_example_ids": [
-        "customers-by-region-list",
         "customer-order-details",
+        "orders-with-customer-and-status",
         "shipments-with-carrier-and-customer"
       ],
       "tags": [
@@ -949,8 +948,8 @@
       "relevant_example_ids": [],
       "retrieved_example_ids": [
         "refunds-with-order-status",
-        "orders-by-status-count",
-        "cancelled-orders-list"
+        "orders-with-customer-and-status",
+        "delivered-shipment-times"
       ],
       "tags": [
         "edge",
@@ -977,17 +976,17 @@
     "by_query_type": {
       "SELECT_AGGREGATE": {
         "cases": 12,
-        "exact_match_rate": 0.5,
+        "exact_match_rate": 0.4166666666666667,
         "execution_accuracy": 0.75
       },
       "SELECT_JOIN": {
         "cases": 4,
-        "exact_match_rate": 0.0,
-        "execution_accuracy": 0.75
+        "exact_match_rate": 0.25,
+        "execution_accuracy": 0.5
       },
       "SELECT_SIMPLE": {
         "cases": 2,
-        "exact_match_rate": 0.5,
+        "exact_match_rate": 0.0,
         "execution_accuracy": 0.5
       },
       "SELECT_TEMPORAL": {
@@ -996,13 +995,13 @@
         "execution_accuracy": 0.8571428571428571
       }
     },
-    "case_pass_rate": 0.8,
-    "exact_match_rate": 0.44,
-    "execution_accuracy": 0.76,
-    "failed_cases": 6,
-    "macro_context_precision_at_3": 0.29333333333333333,
-    "macro_context_recall_at_3": 0.88,
-    "passed_cases": 24,
+    "case_pass_rate": 0.7666666666666667,
+    "exact_match_rate": 0.4,
+    "execution_accuracy": 0.72,
+    "failed_cases": 7,
+    "macro_context_precision_at_3": 0.32,
+    "macro_context_recall_at_3": 0.94,
+    "passed_cases": 23,
     "total_cases": 30
   }
 }
