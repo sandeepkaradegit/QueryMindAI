@@ -521,5 +521,6 @@ Notes for reviewers:
 
 - `assignment_03_sql_agent.md` is the detailed functional assignment and scoring rubric.
 - `Capstone_Submission_Instruction.pdf` adds repository, documentation, architecture, demo, and presentation expectations.
+- PPT deck path: `https://github.com/sandeepkaradegit/QueryMindAI/blob/main/QueryMindAI_Demo_Deck_Final.pptx`
 
 When implementation changes, update this README in the same change so the status, commands, API behavior, and architecture remain accurate. When environment variables or their defaults change, update `.env.sample` and the corresponding README instructions in the same change. Never commit private values from `.env`, and do not overwrite a user's existing `.env` while applying configuration changes.
